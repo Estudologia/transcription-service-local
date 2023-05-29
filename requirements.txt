@@ -1,0 +1,11 @@
+openai==0.27.4
+flask==2.2.3
+gunicorn==20.1.0
+yt_dlp==2023.3.4
+moviepy==1.0.3
+ffmpeg==1.4
+ffprobe==0.5
+python-dotenv==1.0.0
+gdown==4.7.1
+pydub==0.25.1
+threaded==4.1.0
