@@ -24,6 +24,11 @@ def read_file_content(file_name, output_dir):
 def async_transcription(video_url):
   transcription.main(video_url)
 
+
+def async_download_video_and_extract_audio(video_url):
+  transcription.download_video_and_extract_audio(video_url)
+
+
 @api.route('/', methods=['GET'])
 def welcome():
   return jsonify({"success": True}), 200
@@ -76,5 +81,35 @@ def video_transcription():
   else:
     return jsonify({ "video_url": video_url, "success": True, "transcription": persisted_file }), 200
 
+
+@api.route('/massive_transcription.json', methods=['POST'])
+def massive_transcription():
+  path = 'temp_audio'
+  processed_files_path = 'massive-transcription-data/processed_files.txt'
+  files_to_process = os.listdir(path)
+  count = 0
+
+  for file in files_to_process:
+    processed_files = open(processed_files_path, 'r+')
+    processed_files_name = [processed_files_name.strip() for processed_files_name in processed_files.readlines()]
+    video_exist = os.path.exists(f"temp_audio/{file}/video.mp4")
+    audio_not_exist = not os.path.exists(f"temp_audio/{file}/audio.mp3")
+    audio_compressed_not_exist = not os.path.exists(f"temp_audio/{file}/audio_compressed.mp3")
+
+    if (file not in processed_files_name) and video_exist and audio_not_exist and audio_compressed_not_exist:
+      try:
+        count += 1
+        t = threading.Thread(target=async_download_video_and_extract_audio, args=(file,))
+        t.start()
+        processed_files.write(file+'\n')
+        processed_files.close()      
+        if count % 5 == 0:
+          time.sleep(5*60)
+      except:
+        return jsonify({"Error": "\nError in file: " % file})
+          
+  return jsonify({"Finished": "True"})
+
+
 if __name__ == '__main__':
-    api.run(debug=True, port=8000)
+  api.run(debug=True, port=8000)
