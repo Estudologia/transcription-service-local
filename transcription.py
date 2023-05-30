@@ -14,8 +14,11 @@ __all__ = ["split_transcription"]
 
 
 def download_from_google_drive(video_id: str, output_path: str) -> None:
-    gdrive_url = f"https://drive.google.com/uc?id={video_id}"
-    gdown.download(gdrive_url, output_path, quiet=False)
+    return True
+    gdrive_url = f"https://drive.google.com/uc?export=download&id={video_id}&confirm=t"
+    # gdrive_url = f"https://www.googleapis.com/drive/v3/files/{video_id}?alt=media&key=AIzaSyDFttA94lXu8WyTQunNqrauLg69lQdqGaA"
+    # gdrive_url = f"https://www.googleapis.com/drive/v3/files/1IQ6p40jfGEJT_4qnX7eP1TJNk9VpAa?alt=media&key=AIzaSyDVQw45DwoYh632gvsP5vPDqEKvb"
+    gdown.download(gdrive_url, output_path, quiet=False, use_cookies=False)
 
 def compress_mp3(video_id: str, audio_format, audio_path, compressed_audio_path):
     # Lê o arquivo de entrada
@@ -43,7 +46,7 @@ def download_video_and_extract_audio(video_id: str, audio_format: str = "mp3") -
     compressed_audio_path = os.path.join(project_dir, f"temp_audio/{video_id}/audio_compressed.{audio_format}")
 
     # Download video
-    download_from_google_drive(video_id, video_path)
+    download_from_google_drive(video_id, video_path) if not (os.path.exists(video_path) and os.path.getsize(video_path) > 0) else None
 
     # Extract audio from video
     video = VideoFileClip(video_path)
@@ -149,6 +152,9 @@ def main(video_url: str):
         # os.remove(audio_path)
     else:
         transcription_text = persisted_file
+
+    # video_path = os.path.join(project_dir, f"temp_audio/{video_id}/video.mp4")
+    # os.remove(video_path)
 
     print("Splitting transcription into segments...")
     segments = split_transcription(transcription_text, num_segments=5)

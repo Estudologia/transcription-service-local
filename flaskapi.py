@@ -66,9 +66,13 @@ def video_transcription():
   # CHECK FILE EXISTS
   persisted_file = read_file_content("transcription.txt", f"all_transcriptions/{video_id}")
   if persisted_file == False:
-    t = threading.Thread(target=async_transcription, args=(video_url,))
-    t.start()
-    return jsonify({ "success": True, "message": "Processing" })
+    try:
+      # transcription.download_video_and_extract_audio(video_id)
+      t = threading.Thread(target=async_transcription, args=(video_url,))
+      t.start()
+      return jsonify({ "success": True, "message": "Processing" })
+    except:
+      return jsonify({ "success": False, "message": "ERROR" })
   else:
     return jsonify({ "video_url": video_url, "success": True, "transcription": persisted_file }), 200
 
