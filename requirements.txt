@@ -9,3 +9,5 @@ python-dotenv==1.0.0
 gdown==4.7.1
 pydub==0.25.1
 threaded==4.1.0
+openai-whisper==20230314
+setuptools-rust==1.6.0

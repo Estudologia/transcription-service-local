@@ -29,6 +29,12 @@ def async_download_video_and_extract_audio(video_url):
   transcription.download_video_and_extract_audio(video_url)
 
 
+def async_audio_to_txt(video_id):
+  project_dir = os.path.dirname(os.path.abspath(__file__))
+  compressed_audio_path = os.path.join(project_dir, f"temp_audio/{video_id}/audio_compressed.mp3")
+  transcribe_audio(compressed_audio_path, "mp3")
+
+
 @api.route('/', methods=['GET'])
 def welcome():
   return jsonify({"success": True}), 200
@@ -102,12 +108,39 @@ def massive_transcription():
         t = threading.Thread(target=async_download_video_and_extract_audio, args=(file,))
         t.start()
         processed_files.write(file+'\n')
-        processed_files.close()      
+        processed_files.close()
         if count % 5 == 0:
           time.sleep(5*60)
       except:
         return jsonify({"Error": "\nError in file: " % file})
-          
+
+  return jsonify({"Finished": "True"})
+
+@api.route('/audio_to_txt.json', methods=['GET'])
+def audio_to_txt():
+  processing_pending_path = 'massive-transcription-data/processing_pending.txt'
+  pending_files = open(processing_pending_path, 'r')
+  pending_path_name = [p.strip() for p in pending_files.readlines()]
+  current_pending_path_name = pending_path_name
+  pending_files.close()
+  count = 0
+
+  for folder_name in pending_path_name:
+    try:
+      count += 1
+      t = threading.Thread(target=async_audio_to_txt, args=(folder_name,))
+      t.start()
+      print(folder_name)
+      current_pending_path_name.remove(folder_name)
+      with open(processing_pending_path, 'w') as file:
+        file.write(current_pending_path_name)
+
+      if count % 5 == 0:
+        time.sleep(5*60)
+    except:
+      print("\nError in folder: %s" % folder_name)
+
+
   return jsonify({"Finished": "True"})
 
 

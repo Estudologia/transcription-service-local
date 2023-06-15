@@ -38,8 +38,8 @@ def compress_mp3(video_id: str, audio_format, audio_path, compressed_audio_path)
     print(f"Tamanho do arquivo comprimido: {compressed_size} bytes")
 
 
-def download_video_and_extract_audio(video_id: str, audio_format: str = "mp3") -> Tuple[str, str]:
-    project_dir = os.path.dirname(os.path.abspath(__file__))
+def download_video_and_extract_audio(video_id: str, destination_path: str = None, audio_format: str = "mp3") -> Tuple[str, str]:
+    project_dir = os.path.dirname(os.path.abspath(__file__)) if destination_path is None else destination_path
     os.makedirs(f"temp_audio/{video_id}") if not os.path.exists(f"temp_audio/{video_id}") else None
     video_path = os.path.join(project_dir, f"temp_audio/{video_id}/video.mp4")
     audio_path = os.path.join(project_dir, f"temp_audio/{video_id}/audio.{audio_format}")
